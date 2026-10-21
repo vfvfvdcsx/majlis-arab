@@ -274,20 +274,29 @@ table.sum th{width:32%}
     </div>
     <div class="voice-live" id="voiceLive" hidden></div>
     <div class="key-panel" id="keyPanel" hidden>
-      <label for="keyIn">مفتاح Claude API</label>
+      <label for="keyIn">المفتاح (جيميناي المجاني أو Claude)</label>
       <div class="row">
-        <input id="keyIn" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-..." dir="ltr">
+        <input id="keyIn" type="password" autocomplete="off" spellcheck="false" placeholder="AIza... أو sk-ant-..." dir="ltr">
         <button class="btn" id="keySave" type="button">احفظ</button>
         <button class="btn" id="keyDel" type="button">امسح</button>
       </div>
-      <p class="note"><b>شو هو المفتاح؟</b> مثل كلمة سر تخلّي هالموقع يستخدم Claude. تسويه مرة وحدة بس:</p>
+      <p class="note"><b>شو هو المفتاح؟</b> مثل بطاقة تخلّي هالموقع يستخدم الذكاء الاصطناعي. تسويه مرة وحدة بس، وتختار وحدة من الطريقتين:</p>
+      <p class="note"><b>الطريقة المجانية: مفتاح جيميناي من جوجل (بدون بطاقة)</b></p>
       <ol class="key-steps">
-        <li>افتح موقع <b>console.anthropic.com</b> وسجّل دخول بإيميلك (أو حساب جوجل).</li>
-        <li>من القائمة اختر <b>Billing</b> (الفوترة)، حط بطاقتك واشترِ رصيد. 5 دولار تكفي لجلسات وايد.</li>
-        <li>من القائمة اختر <b>API Keys</b> (المفاتيح)، اضغط <b>Create Key</b>، سمّه مثلاً «مجلس»، وانسخه. يبدأ بـ <b>sk-ant-</b> ويطلع لك مرة وحدة بس.</li>
-        <li>الصقه في المربع اللي فوق واضغط «احفظ». ينحفظ في متصفحك بس، وما يشوفه أحد غيرك.</li>
+        <li>افتح موقع <b>aistudio.google.com</b> وسجّل دخول بحساب جوجل حقك.</li>
+        <li>اضغط <b>Get API key</b> (يعني: خذ مفتاح)، وبعدين <b>Create API key</b> (يعني: سوّ مفتاح).</li>
+        <li>انسخ المفتاح. يبدأ بـ <b>AIza</b>.</li>
+        <li>الصقه في المربع اللي فوق واضغط «احفظ».</li>
       </ol>
-      <p class="note">ما تبغى مفتاح؟ استخدم نسخة المجلس اللي على رابط Claude. تشتغل من حسابك بدون مفتاح، بس بدون زر المايك.</p>
+      <p class="note">جيميناي المجاني له حد بالدقيقة وباليوم. إذا وصلته، المجلس ينتظر شوي ويكمل بروحه. جوجل ممكن تستخدم كلام النسخة المجانية لتحسين خدماتها، فلا تكتب فيه شي سري.</p>
+      <p class="note"><b>الطريقة المدفوعة: مفتاح Claude (أفضل جودة)</b></p>
+      <ol class="key-steps">
+        <li>افتح موقع <b>console.anthropic.com</b> وسجّل دخول.</li>
+        <li>من <b>Billing</b> (الدفع) اشحن رصيد، 5 دولار تكفي وايد.</li>
+        <li>من <b>API Keys</b> (المفاتيح) اضغط <b>Create Key</b>، وانسخ المفتاح. يبدأ بـ <b>sk-ant-</b>.</li>
+        <li>الصقه في المربع اللي فوق واضغط «احفظ».</li>
+      </ol>
+      <p class="note">المفتاح ينحفظ في متصفحك أنت بس. اللي تشارك معه الرابط يحتاج يحط مفتاحه هو، وما يشوف مفتاحك ولا مواضيعك.</p>
     </div>
     <textarea id="req" maxlength="4000">اكتب لي رسالة شكر قصيرة لمديري لأنه وقف معي في مشروع التخرج</textarea>
     <div class="row">
@@ -301,7 +310,7 @@ table.sum th{width:32%}
       <button class="btn stop" id="stop" type="button" hidden>وقّف الموضوع</button>
       <button class="btn primary" id="go" type="button">ابدأ الموضوع</button>
     </div>
-    <p class="note" id="note">اضغط «تكلّم» وقول طلبك بلهجتك، أو اكتبه. «ابدأ الموضوع» يشغّل الفريق بـ Claude بمفتاحك، والعرض التجريبي ما يستخدم شي.</p>
+    <p class="note" id="note">اضغط «تكلّم» وقول طلبك بلهجتك، أو اكتبه. «ابدأ الموضوع» يشغّل الفريق بمفتاحك (جيميناي المجاني أو Claude)، والعرض التجريبي ما يستخدم شي.</p>
   </section>
 
   <section class="stage-card" aria-label="المجلس">
@@ -1493,6 +1502,15 @@ table.sum th{width:32%}
     decision.classList.toggle("sealed", r.sealed);
     copyBtn.disabled = !r.text || sel.running;
   }
+  const STORE = "majlis-arab-topics-v1";
+  function saveState() {
+    try {
+      localStorage.setItem(STORE, JSON.stringify(topics.map((t) => ({
+        req: t === sel ? req.value : t.req,
+        result: t.result.sealed ? { text: t.result.text, summary: t.result.summary, verdict: t.result.verdict, cls: t.result.cls, sealed: true } : null,
+      }))));
+    } catch {}
+  }
   function setResult(t, patch) { Object.assign(t.result, patch); if (t === sel) renderResult(); renumber(); }
 
   // ---------- minutes
@@ -1583,9 +1601,53 @@ table.sum th{width:32%}
   const KEY_NAME = "majlis-arab-key";
   const getKey = () => { try { return localStorage.getItem(KEY_NAME) || localStorage.getItem("majlis-hamad-key") || ""; } catch { return ""; } };
   const setKey = (v) => { try { v ? localStorage.setItem(KEY_NAME, v) : (localStorage.removeItem(KEY_NAME), localStorage.removeItem("majlis-hamad-key")); } catch {} };
+  // ---------- Google Gemini (free key, starts with AIza)
+  const isGemini = () => getKey().startsWith("AIza");
+  const GEM = { quick: ["gemini-flash-lite-latest", "gemini-2.5-flash-lite", "gemini-2.0-flash"], default: ["gemini-flash-latest", "gemini-2.5-flash", "gemini-2.0-flash"] };
+  const nap = (ms, signal) => new Promise((res, rej) => { const id = setTimeout(res, ms); if (signal) signal.addEventListener("abort", () => { clearTimeout(id); rej({ code: "cancelled" }); }, { once: true }); });
+  async function geminiCall(prompt, opts = {}) {
+    const key = getKey();
+    const list = GEM[opts.modelTier] || GEM.default;
+    const body = JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: opts.json ? { responseMimeType: "application/json" } : {} });
+    let mi = 0, tries = 0;
+    for (;;) {
+      const url = "https://generativelanguage.googleapis.com/v1beta/models/" + list[mi] + ":streamGenerateContent?alt=sse&key=" + encodeURIComponent(key);
+      let res;
+      try { res = await fetch(url, { method: "POST", signal: opts.signal, headers: { "content-type": "application/json" }, body }); }
+      catch (e) { throw { code: e && e.name === "AbortError" ? "cancelled" : "network" }; }
+      if (res.status === 404 && mi < list.length - 1) { mi++; continue; }
+      if ((res.status === 429 || res.status === 503) && tries < 3) { tries++; await nap(tries * 9000, opts.signal); continue; }
+      if (!res.ok) {
+        let msg = ""; try { msg = JSON.stringify(await res.json()); } catch {}
+        const st = res.status;
+        throw { code: (st === 400 || st === 403) && /API key|API_KEY|permission/i.test(msg) ? "bad_key" : st === 429 ? "free_limit" : st === 503 ? "overloaded" : st === 404 ? "bad_model" : st === 400 ? "bad_request" : "upstream_error" };
+      }
+      const reader = res.body.getReader(), dec = new TextDecoder();
+      let buf = "", text = "";
+      try {
+        for (;;) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buf += dec.decode(value, { stream: true });
+          let i;
+          while ((i = buf.indexOf("\n")) >= 0) {
+            const ln = buf.slice(0, i).trim(); buf = buf.slice(i + 1);
+            if (!ln.startsWith("data:")) continue;
+            let ev; try { ev = JSON.parse(ln.slice(5)); } catch { continue; }
+            const parts = (ev.candidates && ev.candidates[0] && ev.candidates[0].content && ev.candidates[0].content.parts) || [];
+            const d = parts.filter((p) => !p.thought).map((p) => p.text || "").join("");
+            if (d) { text += d; if (opts.onText) opts.onText({ text }); }
+          }
+        }
+      } catch (e) { if (e && e.code) throw e; throw { code: e && e.name === "AbortError" ? "cancelled" : "network" }; }
+      if (!text.trim()) throw { code: "empty" };
+      return { text };
+    }
+  }
   async function apiCall(prompt, opts = {}) {
     const key = getKey();
     if (!key) throw { code: "no_key" };
+    if (key.startsWith("AIza")) return geminiCall(prompt, opts);
     let res;
     try {
       res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -1626,9 +1688,9 @@ table.sum th{width:32%}
     throw { code: "invalid_json" };
   }
   let sample = (p, o) => apiCall(p, o);
-  sample.json = async (p, o) => parseJSON((await apiCall(p + "\n\nمهم: ردك يكون JSON صالح فقط، بدون أي كلام قبله أو بعده.", o)).text);
+  sample.json = async (p, o) => parseJSON((await apiCall(p + "\n\nمهم: ردك يكون JSON صالح فقط، بدون أي كلام قبله أو بعده.", { ...o, json: true })).text);
   async function ready() {
-    if (!getKey()) { keyPanel.hidden = false; keyIn.focus(); note.textContent = "حط مفتاح Claude API أول، وبعدين اضغط «ابدأ الموضوع»."; note.classList.add("err"); return false; }
+    if (!getKey()) { keyPanel.hidden = false; keyIn.focus(); note.textContent = "حط المفتاح أول (جيميناي المجاني أو Claude)، وبعدين اضغط «ابدأ الموضوع»."; note.classList.add("err"); return false; }
     return true;
   }
 
@@ -1642,8 +1704,9 @@ table.sum th{width:32%}
     invalid_json: "واحد من الحكام رد بشكل مو مفهوم. جرّب مرة ثانية.",
     no_key: "حط مفتاح Claude API أول (زر «المفتاح»).",
     bad_key: "المفتاح غلط أو منتهي. حط مفتاح جديد من زر «المفتاح».",
+    free_limit: "وصلت حد جيميناي المجاني. انتظر دقيقة وجرّب، وإذا خلص حد اليوم جرّب بكرة.",
     overloaded: "Claude مزحوم الحين. جرّب بعد دقيقة.",
-    network: "ما قدرت أوصل لـ Claude. تأكد من الإنترنت وجرّب.",
+    network: "ما قدرت أوصل للذكاء الاصطناعي. تأكد من الإنترنت وجرّب.",
     bad_model: "الموديل مو متاح لمفتاحك.",
     bad_request: "الطلب ما انقبل. جرّب تصيغه بشكل ثاني.",
     empty: "Claude ما رد بشي. جرّب مرة ثانية.",
@@ -1870,6 +1933,7 @@ table.sum th{width:32%}
     intro(t);
     select(t);
     addBtn.disabled = true;
+    saveState();
     try { await enterTeam(t); } finally { renumber(); }
     req.focus();
   }
@@ -1887,7 +1951,7 @@ table.sum th{width:32%}
     topics.splice(topics.indexOf(t), 1);
     renumber();
     if (sel === t) { sel = null; select(topics[0]); }
-    relayout();
+    relayout(); saveState();
   }
 
   // ---------- start / stop a topic
@@ -1908,7 +1972,7 @@ table.sum th{width:32%}
       for (const a of members(t)) { if (!a.busy && a.el.classList.contains("standing")) await sitDown(a); }
       const out = await session(t, request, demo);
       setResult(t, { text: out.text, summary: out.summary || [], verdict: out.qaApproved ? "معتمد من الحكام وراعي المجلس" + (out.score ? " · " + out.score + "/10" : "") : "راعي المجلس صلّح ملاحظات الحكام واعتمده", cls: "ok", sealed: true });
-      t.running = false; renderButtons(); if (t === sel) renderResult();
+      t.running = false; renderButtons(); if (t === sel) renderResult(); saveState();
       status(t, "خلص الموضوع. النتيجة معتمدة وجاهزة لك");
       round(t, "");
       await celebrate(t);
@@ -1931,7 +1995,8 @@ table.sum th{width:32%}
   demoBtn.addEventListener("click", () => start(sel, true));
   stopBtn.addEventListener("click", () => { sel.stopped = true; sel.ctls.forEach((c) => c.abort()); });
   addBtn.addEventListener("click", addTopic);
-  req.addEventListener("input", () => { if (sel) sel.req = req.value; });
+  let saveT = 0;
+  req.addEventListener("input", () => { if (sel) sel.req = req.value; clearTimeout(saveT); saveT = setTimeout(saveState, 600); });
   document.querySelectorAll(".ex-btn").forEach((b) => b.addEventListener("click", () => { if (!sel.running) { req.value = b.dataset.ex; sel.req = req.value; req.focus(); } }));
   copyBtn.addEventListener("click", async () => {
     try { await navigator.clipboard.writeText(plain(sel.result.text || "")); copyBtn.textContent = "تم النسخ"; }
@@ -2042,20 +2107,20 @@ table.sum th{width:32%}
 
   // ---------- API key
   const keyBtn = $("#keyBtn"), keyPanel = $("#keyPanel"), keyIn = $("#keyIn");
-  const keyState = () => { keyBtn.textContent = getKey() ? "المفتاح ✓" : "المفتاح"; };
+  const keyState = () => { const k = getKey(); keyBtn.textContent = !k ? "المفتاح" : k.startsWith("AIza") ? "المفتاح ✓ جيميناي" : "المفتاح ✓ Claude"; };
   keyBtn.addEventListener("click", () => { keyPanel.hidden = !keyPanel.hidden; if (!keyPanel.hidden) keyIn.focus(); });
   $("#keySave").addEventListener("click", () => {
     const v = keyIn.value.trim();
-    if (!v.startsWith("sk-")) { note.textContent = "المفتاح لازم يبدأ بـ sk-ant-"; note.classList.add("err"); return; }
+    if (!v.startsWith("sk-") && !v.startsWith("AIza")) { note.textContent = "المفتاح لازم يبدأ بـ AIza (جيميناي) أو sk-ant- (Claude)."; note.classList.add("err"); return; }
     setKey(v); keyIn.value = ""; keyPanel.hidden = true; keyState();
-    note.classList.remove("err"); note.textContent = "انحفظ المفتاح. اضغط «تكلّم» وقول طلبك، وبعدين «ابدأ الموضوع».";
+    note.classList.remove("err"); note.textContent = (v.startsWith("AIza") ? "انحفظ مفتاح جيميناي المجاني." : "انحفظ مفتاح Claude.") + " اضغط «تكلّم» وقول طلبك، وبعدين «ابدأ الموضوع».";
   });
   $("#keyDel").addEventListener("click", () => { setKey(""); keyState(); note.textContent = "انمسح المفتاح من هالمتصفح."; });
   keyState();
 
   // ---------- access code
   (async () => {
-    const GATE = "c9d362d2559769aca9435e5ce7410d5c9d6446b29156522b4394054e67e01e58", OK = "majlis-arab-ok";
+    const GATE = "6f113d1e0d935323712bc8d0bd416e74cbdc92352c29909b36a3d4c029554d48", OK = "majlis-arab-ok";
     const gate = $("#gate");
     let ok = false; try { ok = localStorage.getItem(OK) === GATE; } catch {}
     if (ok || !GATE) return;
@@ -2070,11 +2135,19 @@ table.sum th{width:32%}
   })();
 
   // ---------- boot
+  let saved = [];
+  try { saved = JSON.parse(localStorage.getItem(STORE) || "[]"); if (!Array.isArray(saved)) saved = []; } catch { saved = []; }
   const t1 = newTopic(true);
-  t1.req = req.value;
+  for (let i = 1; i < Math.min(saved.length, MAX_TOPICS); i++) newTopic(false);
   computeSeats();
   for (const a of Object.values(actors)) placeSeat(a);
-  intro(t1);
+  topics.forEach((t, i) => {
+    const sv = saved[i];
+    t.req = sv && typeof sv.req === "string" ? sv.req : i === 0 ? req.value : "";
+    if (sv && sv.result && sv.result.text) Object.assign(t.result, sv.result, { summary: normSummary(sv.result.summary) });
+    intro(t);
+    if (t.result.sealed) addMsg(t, host, "هذي نتيجة هالموضوع من آخر جلسة. تقدر تكتب طلب جديد ونبدأ من أول.");
+  });
   select(t1);
 })();
 </script>
