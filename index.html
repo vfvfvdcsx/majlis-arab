@@ -276,7 +276,7 @@ table.sum th{width:32%}
     <div class="key-panel" id="keyPanel" hidden>
       <label for="keyIn">المفتاح (جيميناي المجاني أو Claude)</label>
       <div class="row">
-        <input id="keyIn" type="password" autocomplete="off" spellcheck="false" placeholder="AIza... أو sk-ant-..." dir="ltr">
+        <input id="keyIn" type="password" autocomplete="off" spellcheck="false" placeholder="الصق المفتاح هني" dir="ltr">
         <button class="btn" id="keySave" type="button">احفظ</button>
         <button class="btn" id="keyDel" type="button">امسح</button>
       </div>
@@ -285,7 +285,7 @@ table.sum th{width:32%}
       <ol class="key-steps">
         <li>افتح موقع <b>aistudio.google.com</b> وسجّل دخول بحساب جوجل حقك.</li>
         <li>اضغط <b>Get API key</b> (يعني: خذ مفتاح)، وبعدين <b>Create API key</b> (يعني: سوّ مفتاح).</li>
-        <li>انسخ المفتاح. يبدأ بـ <b>AIza</b>.</li>
+        <li>اضغط زر النسخ اللي جنب المفتاح (مربعين فوق بعض).</li>
         <li>الصقه في المربع اللي فوق واضغط «احفظ».</li>
       </ol>
       <p class="note">جيميناي المجاني له حد بالدقيقة وباليوم. إذا وصلته، المجلس ينتظر شوي ويكمل بروحه. جوجل ممكن تستخدم كلام النسخة المجانية لتحسين خدماتها، فلا تكتب فيه شي سري.</p>
@@ -1599,11 +1599,13 @@ table.sum th{width:32%}
   // ---------- Claude API (direct from the browser with the user's own key)
   const MODELS = { quick: "claude-haiku-5-5", default: "claude-sonnet-5-5" };
   const KEY_NAME = "majlis-arab-key";
-  const getKey = () => { try { return localStorage.getItem(KEY_NAME) || localStorage.getItem("majlis-hamad-key") || ""; } catch { return ""; } };
+  const cleanKey = (v) => String(v || "").replace(/[\s\u200b-\u200f\u202a-\u202e\u2066-\u2069\ufeff"'«»“”]/g, "");
+  const getKey = () => { try { return cleanKey(localStorage.getItem(KEY_NAME) || localStorage.getItem("majlis-hamad-key") || ""); } catch { return ""; } };
+  const isClaudeKey = (k) => k.startsWith("sk-ant");
   const setKey = (v) => { try { v ? localStorage.setItem(KEY_NAME, v) : (localStorage.removeItem(KEY_NAME), localStorage.removeItem("majlis-hamad-key")); } catch {} };
   // ---------- Google Gemini (free key, starts with AIza)
-  const isGemini = () => getKey().startsWith("AIza");
-  const GEM = { quick: ["gemini-flash-lite-latest", "gemini-2.5-flash-lite", "gemini-2.0-flash"], default: ["gemini-flash-latest", "gemini-2.5-flash", "gemini-2.0-flash"] };
+  const isGemini = () => !isClaudeKey(getKey());
+  const GEM = { quick: ["gemini-flash-lite-latest", "gemini-flash-latest", "gemini-3.8-flash", "gemini-2.5-flash-lite", "gemini-2.5-flash"], default: ["gemini-flash-latest", "gemini-3.8-flash", "gemini-2.5-flash"] };
   const nap = (ms, signal) => new Promise((res, rej) => { const id = setTimeout(res, ms); if (signal) signal.addEventListener("abort", () => { clearTimeout(id); rej({ code: "cancelled" }); }, { once: true }); });
   async function geminiCall(prompt, opts = {}) {
     const key = getKey();
@@ -1615,7 +1617,7 @@ table.sum th{width:32%}
       let res;
       try { res = await fetch(url, { method: "POST", signal: opts.signal, headers: { "content-type": "application/json" }, body }); }
       catch (e) { throw { code: e && e.name === "AbortError" ? "cancelled" : "network" }; }
-      if (res.status === 404 && mi < list.length - 1) { mi++; continue; }
+      if ((res.status === 404 || (res.status === 400 && mi < list.length - 1 && /model/i.test(await res.clone().text().catch(() => "")))) && mi < list.length - 1) { mi++; continue; }
       if ((res.status === 429 || res.status === 503) && tries < 3) { tries++; await nap(tries * 9000, opts.signal); continue; }
       if (!res.ok) {
         let msg = ""; try { msg = JSON.stringify(await res.json()); } catch {}
@@ -1647,7 +1649,7 @@ table.sum th{width:32%}
   async function apiCall(prompt, opts = {}) {
     const key = getKey();
     if (!key) throw { code: "no_key" };
-    if (key.startsWith("AIza")) return geminiCall(prompt, opts);
+    if (!isClaudeKey(key)) return geminiCall(prompt, opts);
     let res;
     try {
       res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -2107,13 +2109,13 @@ table.sum th{width:32%}
 
   // ---------- API key
   const keyBtn = $("#keyBtn"), keyPanel = $("#keyPanel"), keyIn = $("#keyIn");
-  const keyState = () => { const k = getKey(); keyBtn.textContent = !k ? "المفتاح" : k.startsWith("AIza") ? "المفتاح ✓ جيميناي" : "المفتاح ✓ Claude"; };
+  const keyState = () => { const k = getKey(); keyBtn.textContent = !k ? "المفتاح" : !isClaudeKey(k) ? "المفتاح ✓ جيميناي" : "المفتاح ✓ Claude"; };
   keyBtn.addEventListener("click", () => { keyPanel.hidden = !keyPanel.hidden; if (!keyPanel.hidden) keyIn.focus(); });
   $("#keySave").addEventListener("click", () => {
-    const v = keyIn.value.trim();
-    if (!v.startsWith("sk-") && !v.startsWith("AIza")) { note.textContent = "المفتاح لازم يبدأ بـ AIza (جيميناي) أو sk-ant- (Claude)."; note.classList.add("err"); return; }
+    const v = cleanKey(keyIn.value);
+    if (v.length < 20) { note.textContent = "المفتاح قصير، شكله ما انتسخ كامل. ارجع لصفحة جوجل واضغط زر النسخ اللي جنب المفتاح، والصقه هني."; note.classList.add("err"); return; }
     setKey(v); keyIn.value = ""; keyPanel.hidden = true; keyState();
-    note.classList.remove("err"); note.textContent = (v.startsWith("AIza") ? "انحفظ مفتاح جيميناي المجاني." : "انحفظ مفتاح Claude.") + " اضغط «تكلّم» وقول طلبك، وبعدين «ابدأ الموضوع».";
+    note.classList.remove("err"); note.textContent = (!isClaudeKey(v) ? "انحفظ مفتاح جيميناي المجاني." : "انحفظ مفتاح Claude.") + " اضغط «تكلّم» وقول طلبك، وبعدين «ابدأ الموضوع».";
   });
   $("#keyDel").addEventListener("click", () => { setKey(""); keyState(); note.textContent = "انمسح المفتاح من هالمتصفح."; });
   keyState();
