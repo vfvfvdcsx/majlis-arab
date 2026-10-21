@@ -198,6 +198,19 @@ textarea:focus-visible,button:focus-visible,input:focus-visible,select:focus-vis
 .final.empty{color:var(--muted);font-size:14px}
 .seal{position:absolute;top:12px;inset-inline-end:14px;width:62px;height:62px;border-radius:50%;border:3px double var(--ok);color:var(--ok);display:grid;place-items:center;font-family:var(--font-display);font-size:13px;line-height:1.1;text-align:center;transform:rotate(-12deg);opacity:0;transition:opacity .3s}
 .decision.sealed .seal{opacity:.9}
+.tbl-wrap{overflow-x:auto;max-width:100%}
+table.md,table.sum{border-collapse:collapse;width:100%;font-size:14px;line-height:1.6;background:var(--surface)}
+table.md th,table.md td,table.sum th,table.sum td{border:1px solid var(--line);padding:7px 10px;text-align:start;vertical-align:top}
+table.md th,table.sum th{background:var(--gold-soft);font-weight:600}
+table.sum th{width:32%}
+.final h3{font-family:var(--font-display);font-weight:500;margin:10px 0 4px;font-size:18px}
+.final p{margin:0 0 8px}.final ul{margin:0 0 8px;padding-inline-start:22px}
+.final .tbl-wrap{margin:8px 0 12px}
+.sum-title{margin:0;font-family:var(--font-display);font-weight:500;font-size:16px;color:var(--muted)}
+.final.rich{white-space:normal}
+.undo{font:inherit;font-size:13px;cursor:pointer;margin-inline-start:8px;padding:1px 10px;border-radius:999px;border:1px solid var(--maroon);background:transparent;color:var(--maroon)}
+.key-steps{margin:0;padding-inline-start:20px;font-size:14px;display:grid;gap:2px}
+.key-steps b{direction:ltr;unicode-bidi:isolate}
 .gate{position:fixed;inset:0;z-index:50;background:var(--bg);display:grid;place-items:center;padding:16px}
 .gate-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:32px 28px 26px;display:grid;gap:14px;width:min(360px,100%);text-align:center;box-shadow:0 10px 30px rgba(43,30,23,.12)}
 .gate-icon{width:56px;height:56px;margin:0 auto;border-radius:50%;display:grid;place-items:center;background:var(--maroon-soft);color:var(--maroon)}
@@ -267,7 +280,14 @@ textarea:focus-visible,button:focus-visible,input:focus-visible,select:focus-vis
         <button class="btn" id="keySave" type="button">احفظ</button>
         <button class="btn" id="keyDel" type="button">امسح</button>
       </div>
-      <p class="note">تاخذه من console.anthropic.com ← API Keys. ينحفظ في متصفحك بس، ويروح لـ Claude وبس.</p>
+      <p class="note"><b>شو هو المفتاح؟</b> مثل كلمة سر تخلّي هالموقع يستخدم Claude. تسويه مرة وحدة بس:</p>
+      <ol class="key-steps">
+        <li>افتح موقع <b>console.anthropic.com</b> وسجّل دخول بإيميلك (أو حساب جوجل).</li>
+        <li>من القائمة اختر <b>Billing</b> (الفوترة)، حط بطاقتك واشترِ رصيد. 5 دولار تكفي لجلسات وايد.</li>
+        <li>من القائمة اختر <b>API Keys</b> (المفاتيح)، اضغط <b>Create Key</b>، سمّه مثلاً «مجلس»، وانسخه. يبدأ بـ <b>sk-ant-</b> ويطلع لك مرة وحدة بس.</li>
+        <li>الصقه في المربع اللي فوق واضغط «احفظ». ينحفظ في متصفحك بس، وما يشوفه أحد غيرك.</li>
+      </ol>
+      <p class="note">ما تبغى مفتاح؟ استخدم نسخة المجلس اللي على رابط Claude. تشتغل من حسابك بدون مفتاح، بس بدون زر المايك.</p>
     </div>
     <textarea id="req" maxlength="4000">اكتب لي رسالة شكر قصيرة لمديري لأنه وقف معي في مشروع التخرج</textarea>
     <div class="row">
@@ -913,10 +933,22 @@ textarea:focus-visible,button:focus-visible,input:focus-visible,select:focus-vis
     <section class="card decision" id="decision" aria-label="قرار المجلس">
       <div class="seal" aria-hidden="true">معتمد<br>من المجلس</div>
       <div class="card-head"><h2>قرار المجلس</h2><span class="verdict" id="verdict">ما بدأنا لين الحين</span></div>
+      <div id="sumWrap" hidden><p class="sum-title">ملخص القرار</p><div class="tbl-wrap"><table class="sum" id="sumTable"></table></div></div>
       <div class="final empty" id="final">النتيجة تطلع هني بعد ما يدققها الحكام ويعطيها راعي المجلس الكلمة الأخيرة.</div>
-      <div class="row"><button class="btn" id="copy" type="button" disabled>نسخ النتيجة</button></div>
+      <div class="row">
+        <button class="btn" id="copy" type="button" disabled>نسخ النتيجة</button>
+        <button class="btn dl" id="dlWord" type="button" disabled>تحميل Word</button>
+        <button class="btn dl" id="dlExcel" type="button" disabled>تحميل Excel</button>
+        <button class="btn dl" id="dlTxt" type="button" disabled>تحميل نص</button>
+        <button class="btn" id="allSumBtn" type="button">ملخص كل المواضيع</button>
+      </div>
     </section>
   </div>
+
+  <section class="card" id="allCard" hidden aria-label="ملخص كل المواضيع">
+    <div class="card-head"><h2>ملخص كل المواضيع</h2><span class="sub">جدول فيه كل موضوع وطلبه وخلاصته</span></div>
+    <div class="tbl-wrap"><table class="md" id="allTable"></table></div>
+  </section>
 </div>
 
 <template id="avatars"><svg class="av-svg" data-av="host" viewBox="262 196 486 500" aria-hidden="true"><g transform="translate(0 34)"><g class="head">
@@ -1213,6 +1245,7 @@ textarea:focus-visible,button:focus-visible,input:focus-visible,select:focus-vis
   const statusEl = $("#status"), roundEl = $("#round"), chats = $("#chats"), chatSub = $("#chatSub");
   const finalEl = $("#final"), verdict = $("#verdict"), copyBtn = $("#copy"), decision = $("#decision");
   const tabsEl = $("#topics"), addBtn = $("#addTopic"), reqLabel = $("#reqLabel");
+  const sumWrap = $("#sumWrap"), sumTable = $("#sumTable"), allCard = $("#allCard"), allTable = $("#allTable");
   const COLORS = ["#2F7C80", "#B5384F", "#7A5BC4"];
   const NUM = ["١", "٢", "٣"];
   const MAX_TOPICS = 3, MAX_CHECKS = 2;
@@ -1347,7 +1380,7 @@ textarea:focus-visible,button:focus-visible,input:focus-visible,select:focus-vis
     const no = ++topicSeq, idx = topics.length;
     const color = COLORS[idx % COLORS.length];
     const t = { no, color, m: {}, running: false, stopped: false, ctls: new Set(), req: "", status: "الفريق جاهز", round: "",
-      result: { text: "", verdict: "ما بدأنا لين الحين", cls: "", sealed: false }, chat: document.createElement("div"), tab: null };
+      result: { text: "", summary: [], verdict: "ما بدأنا لين الحين", cls: "", sealed: false }, chat: document.createElement("div"), tab: null };
     const n = topics.length + 1;
     const qaName = "حكم الجودة" + (no > 1 ? " " + NUM[Math.min(n, 3) - 1] : "");
     t.m.r1 = makeActor("researcher", "الباحث الأول", "worker", first);
@@ -1401,9 +1434,60 @@ textarea:focus-visible,button:focus-visible,input:focus-visible,select:focus-vis
     statusEl.textContent = (topics.length > 1 ? sel.label + ": " : "") + sel.status;
     roundEl.textContent = [sel.round, busy > 1 ? busy + " مواضيع شغالة" : ""].filter(Boolean).join(" · ");
   }
+  // ---------- light markdown: headings, lists, bold, tables
+  const esc = (x) => String(x).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const inl = (x) => esc(x).replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
+  const cells = (ln) => ln.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((c) => c.trim());
+  const isRow = (ln) => /^\s*\|.*\|\s*$/.test(ln);
+  const isSep = (ln) => /^\s*\|[\s:|-]+\|\s*$/.test(ln);
+  function mdBlocks(text) {
+    const lines = String(text).replace(/\r/g, "").split("\n"), out = [];
+    for (let i = 0; i < lines.length; i++) {
+      const ln = lines[i];
+      if (isRow(ln)) {
+        const rows = [];
+        while (i < lines.length && isRow(lines[i])) { if (!isSep(lines[i])) rows.push(cells(lines[i])); i++; }
+        i--; if (rows.length) out.push({ t: "table", rows }); continue;
+      }
+      const h = ln.match(/^\s*#{1,4}\s+(.*)$/); if (h) { out.push({ t: "h", x: h[1] }); continue; }
+      const li = ln.match(/^\s*(?:[-•*]|\d+[.)])\s+(.*)$/);
+      if (li) { const last = out[out.length - 1]; if (last && last.t === "ul") last.items.push(li[1]); else out.push({ t: "ul", items: [li[1]] }); continue; }
+      if (!ln.trim()) continue;
+      out.push({ t: "p", x: ln });
+    }
+    return out;
+  }
+  function tableHtml(rows, cls = "md") {
+    if (!rows.length) return "";
+    const [hd, ...bd] = rows;
+    return '<div class="tbl-wrap"><table class="' + cls + '"><thead><tr>' + hd.map((c) => "<th>" + inl(c) + "</th>").join("") + "</tr></thead><tbody>" +
+      bd.map((r) => "<tr>" + r.map((c) => "<td>" + inl(c) + "</td>").join("") + "</tr>").join("") + "</tbody></table></div>";
+  }
+  function mdHtml(text) {
+    return mdBlocks(text).map((b) => b.t === "table" ? tableHtml(b.rows)
+      : b.t === "h" ? "<h3>" + inl(b.x) + "</h3>"
+      : b.t === "ul" ? "<ul>" + b.items.map((x) => "<li>" + inl(x) + "</li>").join("") + "</ul>"
+      : "<p>" + inl(b.x) + "</p>").join("");
+  }
+  const plain = (text) => String(text).replace(/\*\*([^*]+)\*\*/g, "$1").replace(/^\s*#{1,4}\s+/gm, "");
+  function normSummary(x) {
+    if (!Array.isArray(x)) return [];
+    return x.map((r) => {
+      if (Array.isArray(r)) return [String(r[0] ?? ""), String(r[1] ?? "")];
+      if (r && typeof r === "object") { const v = Object.values(r); return [String(r.label ?? v[0] ?? ""), String(r.value ?? v[1] ?? "")]; }
+      return null;
+    }).filter((r) => r && r[0] && !(r[0] === "البند" && r[1] === "الخلاصة")).slice(0, 10);
+  }
+  function renderSummary(rows) {
+    sumWrap.hidden = !rows.length;
+    sumTable.innerHTML = rows.length ? "<tbody>" + rows.map((r) => "<tr><th>" + inl(r[0]) + "</th><td>" + inl(r[1]) + "</td></tr>").join("") + "</tbody>" : "";
+  }
   function renderResult() {
     const r = sel.result;
-    finalEl.textContent = r.text || "النتيجة تطلع هني بعد ما يدققها الحكام ويعطيها راعي المجلس الكلمة الأخيرة.";
+    if (r.text && !sel.running) { finalEl.innerHTML = mdHtml(r.text); finalEl.classList.add("rich"); }
+    else { finalEl.textContent = r.text || "النتيجة تطلع هني بعد ما يدققها الحكام ويعطيها راعي المجلس الكلمة الأخيرة."; finalEl.classList.remove("rich"); }
+    renderSummary(sel.running ? [] : r.summary || []);
+    document.querySelectorAll(".dl").forEach((b) => { b.disabled = !r.text || sel.running; });
     finalEl.classList.toggle("empty", !r.text || sel.running);
     verdict.textContent = r.verdict; verdict.className = "verdict" + (r.cls ? " " + r.cls : "");
     decision.classList.toggle("sealed", r.sealed);
@@ -1587,7 +1671,7 @@ textarea:focus-visible,button:focus-visible,input:focus-visible,select:focus-vis
   const FMT = "اكتب ردك بهالشكل بالضبط:\nقول: (جملة وحدة قصيرة تقولها في المجلس باللهجة الخليجية وتوجهها للي بعدك، 14 كلمة كحد أقصى)\n---\n(المحتوى)\n\n";
   const Q = (x) => "\"\"\"" + x + "\"\"\"";
   const P = {
-    understand: (raw) => COMMON + "دورك: «راعي المجلس». أول شي تفهم طلب الضيف. الضيف غالباً يسجّل طلبه بالصوت، فالنص ممكن يكون بلهجة خليجية وفيه كلمات غلط من الكتابة الصوتية (كلمة مكان كلمة تشبهها في الصوت، أو كلمات ناقصة أو مكررة). افهم قصده الحقيقي وتجاهل الكلمات الزايدة.\n" +
+    understand: (raw) => COMMON + "دورك: «راعي المجلس». أول شي تفهم طلب الضيف. الضيف غالباً يسجّل طلبه بالصوت، فالنص ممكن يكون بلهجة خليجية وفيه كلمات غلط من الكتابة الصوتية (كلمة مكان كلمة تشبهها في الصوت، أو كلمات ناقصة أو مكررة). الضيف يخلط عربي وإنجليزي، فالأسماء الإنجليزية (ماركات، موديلات، مصطلحات) ممكن تطلع مكتوبة بحروف عربية حسب نطقها، مثل «بي واي دي ديستروير ٠٥» = BYD Destroyer 05: رجّعها لاسمها الصحيح. افهم قصده الحقيقي وتجاهل الكلمات الزايدة.\n" +
       "رد بـ JSON فقط:\n{\"say\": \"جملة قصيرة تقولها للضيف باللهجة الخليجية تلخص فهمك، تبدأ بـ «فهمت عليك يا الغالي»\", \"request\": \"الطلب مكتوب بوضوح وكامل بكل تفاصيله، بدون ما تزيد شي ما قصده\"}\n- اكتب request بالعربي الواضح، واذكر فيه لغة الناتج إذا الضيف طلب لغة معينة.\n\nكلام الضيف:\n" + Q(raw),
     r1: (r) => COMMON + "دورك: «الباحث الأول». اجمع المعلومات والحقائق والمحتوى اللي يحتاجه الطلب.\n" + FMT +
       "قواعد المحتوى:\n- من 4 إلى 7 نقاط قصيرة، كل نقطة في سطر يبدأ بـ «- ».\n- ما عندك إنترنت، اعتمد على معرفتك. المعلومة اللي مو متأكد منها اكتب جنبها (تحتاج تأكيد).\n- لا تكتب الناتج النهائي.\n\nالطلب:\n" + Q(r),
@@ -1596,15 +1680,15 @@ textarea:focus-visible,button:focus-visible,input:focus-visible,select:focus-vis
     planner: (r, notes) => COMMON + "دورك: «المخطّط». خذ الطلب وملاحظات الباحثين وسوّ خطة واضحة للكاتب.\n" + FMT +
       "المحتوى يكون هالأسطر فقط:\nالشكل: (نوع الناتج وطوله التقريبي)\nالأسلوب: (النبرة ومستوى اللغة)\nالهيكل:\n1) ...\n(من 3 إلى 6 خطوات)\nلازم يحتوي: (أهم الأشياء)\n\nالطلب:\n" + Q(r) + "\n\n" + notes,
     writer: (r, notes, plan) => COMMON + "دورك: «الكاتب». اكتب الناتج النهائي كامل حسب الطلب والخطة.\n" + FMT +
-      "قواعد المحتوى:\n- المحتوى هو الناتج نفسه فقط، بدون مقدمة مثل «إليك» وبدون تعليق في الآخر.\n- نص عادي: فقرات، وللقوائم أسطر تبدأ بـ «- » أو أرقام. بدون رموز ماركداون مثل ** أو #.\n- لا تخترع معلومات.\n\nالطلب:\n" + Q(r) + "\n\n" + notes + "\n\nالخطة:\n" + plan,
+      "قواعد المحتوى:\n- المحتوى هو الناتج نفسه فقط، بدون مقدمة مثل «إليك» وبدون تعليق في الآخر.\n- التنسيق المسموح: فقرات، عناوين تبدأ بـ «## »، قوائم تبدأ بـ «- »، وجداول بصيغة | عمود | عمود |. استخدم جدول لما يكون فيه مقارنة أو بيانات أو خطة بأيام أو بنود.\n- لا تخترع معلومات.\n\nالطلب:\n" + Q(r) + "\n\n" + notes + "\n\nالخطة:\n" + plan,
     revise: (r, plan, text, issues) => COMMON + "دورك: «الكاتب». حكم الجودة رجّع لك النسخة بملاحظات. عدّلها عشان تحل كل ملاحظة، وخلّ الباقي مثل ما هو.\n" + FMT +
-      "المحتوى: النسخة المعدّلة كاملة فقط، بدون شرح للتعديلات، وبدون رموز ماركداون.\n\nالطلب:\n" + Q(r) + "\n\nالخطة:\n" + plan + "\n\nالنسخة الحالية:\n" + Q(text) + "\n\nملاحظات حكم الجودة:\n" + issues.map((i) => "- " + i).join("\n"),
+      "المحتوى: النسخة المعدّلة كاملة فقط، بدون شرح للتعديلات. حافظ على الجداول والعناوين.\n\nالطلب:\n" + Q(r) + "\n\nالخطة:\n" + plan + "\n\nالنسخة الحالية:\n" + Q(text) + "\n\nملاحظات حكم الجودة:\n" + issues.map((i) => "- " + i).join("\n"),
     lang: (text) => COMMON + "دورك: «حكم اللغة». دقق النص على الإملاء والنحو والهمزات وعلامات الترقيم والصياغة الركيكة، بدون ما تغيّر المعنى أو الأسلوب أو الطول. إذا النص مكتوب بلهجة عن قصد، صحح الإملاء فقط وخلّ اللهجة.\n" +
-      "رد بـ JSON فقط بهالشكل:\n{\"say\": \"جملة قصيرة تقولها في المجلس باللهجة الخليجية\", \"corrected\": \"النص كامل بعد التصحيح\", \"fixes\": [\"«انشاء» ← «إنشاء»\"]}\n- fixes: وصف قصير لكل تصحيح (8 كحد أقصى)، وتكون [] إذا النص سليم.\n- حافظ على الأسطر والفقرات.\n\nالنص:\n" + Q(text),
-    qa: (r, notes, text) => COMMON + "دورك: «حكم الجودة». قارن النص بالطلب وتأكد من:\n1) ينفذ كل اللي في الطلب.\n2) المعلومات صحيحة وما فيها شي مخترع.\n3) واضح ومرتب ومناسب للقارئ.\n4) ما فيه كلام زايد مثل «إليك» أو رموز ماركداون.\nحكم اللغة يدقق الإملاء معك في نفس الوقت، فلا ترفض بسبب أخطاء إملائية. ارفض فقط إذا في مشكلة حقيقية تأثر على النتيجة.\n" +
+      "رد بـ JSON فقط بهالشكل:\n{\"say\": \"جملة قصيرة تقولها في المجلس باللهجة الخليجية\", \"corrected\": \"النص كامل بعد التصحيح\", \"fixes\": [\"«انشاء» ← «إنشاء»\"]}\n- fixes: وصف قصير لكل تصحيح (8 كحد أقصى)، وتكون [] إذا النص سليم.\n- حافظ على الأسطر والفقرات والجداول (| ... |) والعناوين مثل ما هي.\n\nالنص:\n" + Q(text),
+    qa: (r, notes, text) => COMMON + "دورك: «حكم الجودة». قارن النص بالطلب وتأكد من:\n1) ينفذ كل اللي في الطلب.\n2) المعلومات صحيحة وما فيها شي مخترع.\n3) واضح ومرتب ومناسب للقارئ.\n4) ما فيه كلام زايد مثل «إليك». (الجداول والعناوين والقوائم مسموحة ومطلوبة لما تفيد.)\nحكم اللغة يدقق الإملاء معك في نفس الوقت، فلا ترفض بسبب أخطاء إملائية. ارفض فقط إذا في مشكلة حقيقية تأثر على النتيجة.\n" +
       "رد بـ JSON فقط:\n{\"approved\": true, \"score\": 9, \"say\": \"جملة قصيرة تقولها للكاتب باللهجة الخليجية\", \"issues\": [], \"note\": \"جملة قصيرة عن حكمك\"}\n- score من 1 إلى 10. issues: كل مشكلة بجملة محددة وكيف تنحل (4 كحد أقصى)، وفاضية إذا approved = true.\n\nالطلب:\n" + Q(r) + "\n\n" + notes + "\n\nالنص:\n" + Q(text),
     hostFinal: (r, text, left) => COMMON + "دورك: «راعي المجلس». أنت تشتغل وتحكم في نفس الوقت، وكلمتك هي الأخيرة قبل ما يطلع الشغل للضيف. راجع النص مقابل الطلب. إذا فيه أي شي يحتاج تعديل (نقص، خطأ، صياغة، أو ملاحظات الحكام اللي ما انحلت) صلّحه بنفسك مباشرة. إذا النص ممتاز خلّه مثل ما هو.\n" +
-      "رد بـ JSON فقط:\n{\"say\": \"جملة قصيرة تقولها في المجلس باللهجة الخليجية\", \"final\": \"النص النهائي كامل\", \"changes\": [\"وصف قصير لكل تعديل سويته\"]}\n- changes تكون [] إذا ما عدّلت شي.\n- بدون مقدمة وبدون رموز ماركداون.\n\nالطلب:\n" + Q(r) + "\n\nملاحظات الحكام اللي ما انحلت:\n" + (left.length ? left.map((i) => "- " + i).join("\n") : "لا يوجد") + "\n\nالنص:\n" + Q(text),
+      "رد بـ JSON فقط:\n{\"say\": \"جملة قصيرة تقولها في المجلس باللهجة الخليجية\", \"final\": \"النص النهائي كامل\", \"changes\": [\"وصف قصير لكل تعديل سويته\"], \"summary\": [[\"البند\", \"الخلاصة\"]]}\n- changes تكون [] إذا ما عدّلت شي.\n- final: بدون مقدمة. حافظ على الجداول والعناوين، وإذا الطلب فيه مقارنة أو بيانات وما فيه جدول، زد جدول مناسب.\n- summary: جدول ملخص القرار، من 5 إلى 8 صفوف، كل صف [البند، الخلاصة] بجملة قصيرة. أول صف دايماً [\"الطلب\", ...]، وبعده أهم النتائج أو المقارنة، وآخر صف [\"الخلاصة\", ...].\n\nالطلب:\n" + Q(r) + "\n\nملاحظات الحكام اللي ما انحلت:\n" + (left.length ? left.map((i) => "- " + i).join("\n") : "لا يوجد") + "\n\nالنص:\n" + Q(text),
   };
 
   // ---------- demo script
@@ -1620,7 +1704,7 @@ textarea:focus-visible,button:focus-visible,input:focus-visible,select:focus-vis
     revise: "قول: عدّلتها وزدت السطر اللي طلبتوه.\n---\nالسلام عليكم أستاذي العزيز،\n\nحبيت أشكرك من قلبي على وقوفك معي طول فترة مشروع التخرج.\nأقدّر لك مرونتك في الدوام، ووقتك اللي عطيتني إياه عشان تراجع معي الشغل وتنصحني.\nدعمك كان له أثر كبير، وما كنت بوصل لهالنتيجة بدونك.\n\nشاكر ومقدّر لك.",
     lang2: { say: "النص نظيف هالمرة، ما عليه كلام.", fixes: [] },
     qa2: { approved: true, score: 9, say: "كذا تمام يا كاتب. معتمدة.", issues: [], note: "رسالة قصيرة وواضحة وفيها لمسة شخصية." },
-    hostFinal: { say: "ما شاء الله عليكم، الشغل تمام. اعتمدته، وحيّاكم على القهوة.", changes: [] },
+    hostFinal: { say: "ما شاء الله عليكم، الشغل تمام. اعتمدته، وحيّاكم على القهوة.", changes: [], summary: [["الطلب", "رسالة شكر قصيرة للمدير على دعمه في مشروع التخرج"], ["النوع", "رسالة قصيرة (واتساب أو إيميل)"], ["الأسلوب", "رسمي ودود وبسيط"], ["أهم ما فيها", "شكر مباشر + موقف محدد: مرونة الدوام ووقته ونصايحه"], ["التدقيق", "حكم اللغة صلّح ٣ همزات، وحكم الجودة رجّعها مرة وحدة"], ["التقييم", "9/10"], ["الخلاصة", "جاهزة للإرسال كما هي"]] },
   };
 
   // ---------- one topic's session
@@ -1709,7 +1793,9 @@ textarea:focus-visible,button:focus-visible,input:focus-visible,select:focus-vis
     const hSay = String(H.res.say || "الشغل تمام، اعتمدته.");
     H.msg.say(hSay); H.msg.body(changes.length ? "عدّلت بنفسي:\n" + changes.map((c) => "- " + c).join("\n") : "ما احتاج أي تعديل. معتمد.");
     face(host, "happy"); bubble(host, hSay); await wait(1500); face(host, "smile");
-    return { text, score: qaScore, qaApproved };
+    const summary = normSummary(H.res.summary);
+    if (summary.length) H.msg.body((changes.length ? "عدّلت بنفسي:\n" + changes.map((c) => "- " + c).join("\n") + "\n\n" : "") + "ملخص القرار:\n" + summary.map((x) => "- " + x[0] + ": " + x[1]).join("\n"));
+    return { text, score: qaScore, qaApproved, summary };
   }
 
   // ---------- celebration
@@ -1811,18 +1897,18 @@ textarea:focus-visible,button:focus-visible,input:focus-visible,select:focus-vis
     if (demo) { req.value = DEMO.request; request = DEMO.request; }
     if (!request) { note.textContent = "اكتب طلبك أول."; note.classList.add("err"); req.focus(); return; }
     if (!demo && !(await ready())) return;
-    if (listening) micStop();
+    if (listening) micStop(true);
     t.req = request; note.classList.remove("err");
     note.textContent = demo ? "هذا عرض تجريبي بنص جاهز، ما يستخدم Claude." : "الفريق يشتغل على " + t.label + ". تقدر تفتح موضوع ثاني وهم شغالين.";
     t.stopped = false; t.running = true;
     t.chat.textContent = "";
-    setResult(t, { text: "", verdict: "الجلسة شغالة", cls: "", sealed: false });
+    setResult(t, { text: "", summary: [], verdict: "الجلسة شغالة", cls: "", sealed: false });
     renderButtons(); renderStatus();
     try {
       for (const a of members(t)) { if (!a.busy && a.el.classList.contains("standing")) await sitDown(a); }
       const out = await session(t, request, demo);
-      setResult(t, { text: out.text, verdict: out.qaApproved ? "معتمد من الحكام وراعي المجلس" + (out.score ? " · " + out.score + "/10" : "") : "راعي المجلس صلّح ملاحظات الحكام واعتمده", cls: "ok", sealed: true });
-      t.running = false; renderButtons();
+      setResult(t, { text: out.text, summary: out.summary || [], verdict: out.qaApproved ? "معتمد من الحكام وراعي المجلس" + (out.score ? " · " + out.score + "/10" : "") : "راعي المجلس صلّح ملاحظات الحكام واعتمده", cls: "ok", sealed: true });
+      t.running = false; renderButtons(); if (t === sel) renderResult();
       status(t, "خلص الموضوع. النتيجة معتمدة وجاهزة لك");
       round(t, "");
       await celebrate(t);
@@ -1837,7 +1923,7 @@ textarea:focus-visible,button:focus-visible,input:focus-visible,select:focus-vis
         if (!e.userMsg) console.error(e);
       }
     } finally {
-      t.running = false; round(t, ""); renderButtons(); renderStatus();
+      t.running = false; round(t, ""); renderButtons(); renderStatus(); if (t === sel) renderResult();
     }
   }
 
@@ -1848,10 +1934,24 @@ textarea:focus-visible,button:focus-visible,input:focus-visible,select:focus-vis
   req.addEventListener("input", () => { if (sel) sel.req = req.value; });
   document.querySelectorAll(".ex-btn").forEach((b) => b.addEventListener("click", () => { if (!sel.running) { req.value = b.dataset.ex; sel.req = req.value; req.focus(); } }));
   copyBtn.addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText(finalEl.textContent); copyBtn.textContent = "تم النسخ"; }
+    try { await navigator.clipboard.writeText(plain(sel.result.text || "")); copyBtn.textContent = "تم النسخ"; }
     catch { const r = document.createRange(); r.selectNodeContents(finalEl); const s = getSelection(); s.removeAllRanges(); s.addRange(r); copyBtn.textContent = "النص محدد، انسخه"; }
     setTimeout(() => { copyBtn.textContent = "نسخ النتيجة"; }, 1800);
   });
+
+  // ---------- summary of all topics
+  function renderAll() {
+    const rows = [["الموضوع", "الطلب", "الخلاصة", "الحالة"]];
+    for (const t of topics) {
+      const s = t.result.summary || [];
+      const get = (k) => (s.find((r) => r[0].includes(k)) || [])[1] || "";
+      const first = t.result.text ? (plain(t.result.text).split("\n").find((x) => x.trim() && !isRow(x)) || "") : "";
+      rows.push([t.label, get("الطلب") || t.req || "ما انكتب طلب", get("الخلاصة") || first || "—", t.running ? "شغال" : t.result.sealed ? "معتمد" : t.result.verdict]);
+    }
+    const [hd, ...bd] = rows;
+    allTable.innerHTML = "<thead><tr>" + hd.map((c) => "<th>" + inl(c) + "</th>").join("") + "</tr></thead><tbody>" + bd.map((r) => "<tr>" + r.map((c) => "<td>" + inl(c) + "</td>").join("") + "</tr>").join("") + "</tbody>";
+  }
+  $("#allSumBtn").addEventListener("click", () => { renderAll(); allCard.hidden = false; allCard.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" }); });
 
   // ---------- microphone (Chrome speech recognition, right in the box)
   const mic = $("#mic"), micLabel = $("#micLabel"), micLang = $("#micLang"), voiceLive = $("#voiceLive");
@@ -1878,9 +1978,67 @@ textarea:focus-visible,button:focus-visible,input:focus-visible,select:focus-vis
     try { rec.start(); } catch { live("ما قدرت أشغّل المايك. جرّب مرة ثانية."); return; }
     listening = true; micUi(true); live("قاعد أسمعك… تكلّم بلهجتك عادي، وراعي المجلس بيفهمك. اضغط مرة ثانية عشان توقف.");
   }
-  function micStop() { listening = false; try { rec && rec.stop(); } catch {} micUi(false); if (voiceLive.textContent.startsWith("قاعد أسمعك")) live(""); }
+  function micStop(skipFix) {
+    const was = listening; listening = false;
+    try { rec && rec.stop(); } catch {}
+    micUi(false);
+    if (voiceLive.textContent.startsWith("قاعد أسمعك")) live("");
+    if (was && !skipFix) setTimeout(fixSpeech, 700);
+  }
+  // after speaking: Claude fixes dictation mistakes and writes English names in English letters
+  async function fixSpeech() {
+    const original = req.value.trim();
+    if (!original || !getKey() || sel.running) return;
+    live("راعي المجلس يصحّح كلامك…");
+    try {
+      const { text } = await apiCall("هذا نص مكتوب بالكتابة الصوتية بالعربي، والمتكلم ممكن يخلط عربي وإنجليزي. صحّح أخطاء الكتابة الصوتية، واكتب الكلمات والأسماء الإنجليزية (ماركات، موديلات، مصطلحات، أرقام موديلات) بحروفها الإنجليزية الصحيحة، مثل «بي واي دي ديستروير ٠٥» ← «BYD Destroyer 05». لا تغيّر المعنى ولا تزيد شي ولا تجاوب على الطلب. رد بالنص المصحّح فقط بدون أي كلام ثاني.\n\nالنص:\n" + original, { modelTier: "quick" });
+      const fixed = text.trim().replace(/^["«]|["»]$/g, "");
+      if (!fixed || req.value.trim() !== original) { live(""); return; }
+      if (fixed === original) { live("كلامك واضح، ما احتاج تصحيح."); setTimeout(() => live(""), 2500); return; }
+      req.value = fixed; sel.req = fixed;
+      voiceLive.textContent = "صحّحت كلامك. ";
+      voiceLive.hidden = false;
+      const u = document.createElement("button"); u.className = "undo"; u.type = "button"; u.textContent = "رجّع كلامي الأصلي";
+      u.onclick = () => { req.value = original; sel.req = original; live(""); };
+      voiceLive.append(u);
+    } catch { live(""); }
+  }
+
   mic.addEventListener("click", () => (listening ? micStop() : micStart()));
-  micLang.addEventListener("change", () => { if (listening) { micStop(); setTimeout(micStart, 250); } });
+  micLang.addEventListener("change", () => { if (listening) { micStop(true); setTimeout(micStart, 250); } });
+
+  // ---------- downloads (Word / Excel / text)
+  const fname = (ext) => "مجلس-العرب-" + sel.label.replace(/\s+/g, "-") + "." + ext;
+  function saveBlob(blob, name) { const u = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = u; a.download = name; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 4000); }
+  const sumRowsWithHead = () => { const s = sel.result.summary || []; return s.length ? [["البند", "الخلاصة"], ...s] : []; };
+  $("#dlTxt").addEventListener("click", () => {
+    const s = sel.result.summary || [];
+    const txt = (s.length ? "ملخص القرار\n" + s.map((r) => r[0] + ": " + r[1]).join("\n") + "\n\n" : "") + plain(sel.result.text || "");
+    saveBlob(new Blob(["﻿" + txt], { type: "text/plain;charset=utf-8" }), fname("txt"));
+  });
+  $("#dlWord").addEventListener("click", () => {
+    const html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><title>مجلس العرب</title>' +
+      "<style>body{font-family:Arial,Tahoma,sans-serif;direction:rtl;font-size:13pt;line-height:1.7}table{border-collapse:collapse;width:100%;margin:8pt 0}th,td{border:1px solid #999;padding:5pt 8pt;text-align:right;vertical-align:top}th{background:#F2E2B6}h1{font-size:20pt;color:#8E2B2F}h3{font-size:15pt}</style></head><body dir=\"rtl\">" +
+      "<h1>مجلس العرب · " + esc(sel.label) + "</h1>" + (sumRowsWithHead().length ? "<h3>ملخص القرار</h3>" + tableHtml(sumRowsWithHead()) : "") + "<h3>النتيجة</h3>" + mdHtml(sel.result.text || "") + "</body></html>";
+    saveBlob(new Blob(["﻿" + html], { type: "application/msword" }), fname("doc"));
+  });
+  let xlsxP = null;
+  const loadXlsx = () => xlsxP || (xlsxP = new Promise((res, rej) => { const s = document.createElement("script"); s.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"; s.onload = () => res(window.XLSX); s.onerror = () => { xlsxP = null; rej(); }; document.head.append(s); }));
+  $("#dlExcel").addEventListener("click", async () => {
+    const tables = mdBlocks(sel.result.text || "").filter((b) => b.t === "table").map((b) => b.rows.map((r) => r.map(plain)));
+    try {
+      const X = await loadXlsx(), wb = X.utils.book_new();
+      wb.Workbook = { Views: [{ RTL: true }] };
+      if (sumRowsWithHead().length) X.utils.book_append_sheet(wb, X.utils.aoa_to_sheet(sumRowsWithHead()), "ملخص القرار");
+      tables.forEach((rows, i) => X.utils.book_append_sheet(wb, X.utils.aoa_to_sheet(rows), "جدول " + (i + 1)));
+      if (!tables.length) X.utils.book_append_sheet(wb, X.utils.aoa_to_sheet(plain(sel.result.text || "").split("\n").filter((x) => x.trim()).map((x) => [x])), "النتيجة");
+      X.writeFile(wb, fname("xlsx"));
+    } catch {
+      const rows = [...sumRowsWithHead(), [], ...tables.flatMap((t) => [...t, []])];
+      const csv = rows.map((r) => r.map((c) => '"' + String(c).replace(/"/g, '""') + '"').join(",")).join("\r\n");
+      saveBlob(new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" }), fname("csv"));
+    }
+  });
 
   // ---------- API key
   const keyBtn = $("#keyBtn"), keyPanel = $("#keyPanel"), keyIn = $("#keyIn");
